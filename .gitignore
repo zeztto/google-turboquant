@@ -19,6 +19,7 @@ coverage
 
 # misc
 .DS_Store
+.claude/
 *.pdf
 npm-debug.log*
 yarn-debug.log*
