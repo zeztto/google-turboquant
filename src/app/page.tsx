@@ -1,259 +1,262 @@
-import { reportData } from "@/content/report";
+import {
+  reportData,
+  type ComparisonRow,
+  type MetricItem,
+  type ReferenceItem,
+  type ReportSection,
+  type ReportStat,
+  type SummaryPoint,
+} from "@/content/report";
 
-function HeroStat({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: string;
-  note: string;
-}) {
+function StatItem({ label, value, note }: ReportStat) {
   return (
-    <div className="hero-stat">
-      <dt className="hero-stat__label">{label}</dt>
-      <dd className="hero-stat__value">{value}</dd>
-      <p className="hero-stat__note">{note}</p>
+    <div className="report-stat">
+      <dt className="report-stat__label">{label}</dt>
+      <dd className="report-stat__value">{value}</dd>
+      <p className="report-stat__note">{note}</p>
     </div>
   );
 }
 
-function SectionCard({
-  label,
-  title,
-  summary,
-  bullets,
-  analogy,
-  source,
-}: (typeof reportData.sections)[number]) {
+function SummaryItem({ title, body }: SummaryPoint) {
   return (
-    <article className="section-card">
-      <header className="section-card__header">
-        <p className="section-card__label">{label}</p>
-        <h3 className="section-card__title">{title}</h3>
-        <p className="section-card__summary">{summary}</p>
-      </header>
-      <ul className="section-card__list">
-        {bullets.map((bullet) => (
-          <li key={bullet} className="section-card__item">
-            {bullet}
-          </li>
-        ))}
-      </ul>
-      {analogy ? (
-        <p className="section-card__analogy">
-          <strong>쉽게 보면:</strong> {analogy}
-        </p>
-      ) : null}
-      <p className="section-card__source">근거: {source}</p>
+    <article className="summary-item">
+      <h3 className="summary-item__title">{title}</h3>
+      <p className="summary-item__body">{body}</p>
     </article>
+  );
+}
+
+function SectionArticle(section: ReportSection) {
+  return (
+    <section
+      id={section.id}
+      aria-labelledby={`${section.id}-title`}
+      className="article-section"
+    >
+      <header className="article-section__header">
+        <p className="article-section__kicker">{section.kicker}</p>
+        <div className="article-section__title-row">
+          <h2 id={`${section.id}-title`} className="article-section__title">
+            {section.title}
+          </h2>
+          <span className="article-section__lens">{section.lens}</span>
+        </div>
+        <p className="article-section__summary">{section.summary}</p>
+      </header>
+
+      <div className="report-prose">
+        {section.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </div>
+
+      {section.bullets ? (
+        <ul className="report-bullets">
+          {section.bullets.map((bullet) => (
+            <li key={bullet} className="report-bullets__item">
+              {bullet}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {section.callout ? (
+        <aside className="report-callout">
+          <h3 className="report-callout__title">{section.callout.title}</h3>
+          <p className="report-callout__body">{section.callout.body}</p>
+        </aside>
+      ) : null}
+
+      <p className="article-section__source">근거: {section.source}</p>
+    </section>
+  );
+}
+
+function ComparisonTable({ rows }: { rows: readonly ComparisonRow[] }) {
+  return (
+    <div className="report-table-wrap">
+      <table className="report-table">
+        <caption className="sr-only">QJL, PolarQuant, TurboQuant 비교표</caption>
+        <thead>
+          <tr>
+            <th scope="col">방법</th>
+            <th scope="col">직접 겨냥한 대상</th>
+            <th scope="col">아주 쉬운 설명</th>
+            <th scope="col">메모리 절감 포인트</th>
+            <th scope="col">비즈니스 의미</th>
+            <th scope="col">주의점</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.method}>
+              <td>{row.method}</td>
+              <td>{row.target}</td>
+              <td>{row.easyExplanation}</td>
+              <td>{row.memoryBenefit}</td>
+              <td>{row.businessMeaning}</td>
+              <td>{row.caution}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function MetricList({ items }: { items: readonly MetricItem[] }) {
+  return (
+    <div className="metric-list">
+      {items.map((item) => (
+        <article key={item.label} className="metric-item">
+          <p className="metric-item__label">{item.label}</p>
+          <h3 className="metric-item__value">{item.value}</h3>
+          <p className="metric-item__body">{item.body}</p>
+          <p className="metric-item__source">{item.source}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ReferenceList({ items }: { items: readonly ReferenceItem[] }) {
+  return (
+    <ul className="reference-list">
+      {items.map((item) => (
+        <li key={item.url} className="reference-list__item">
+          <p className="reference-list__meta">
+            {item.kind === "paper" ? "Paper" : "Blog"} · {item.date}
+          </p>
+          <a
+            className="reference-list__title"
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {item.title}
+          </a>
+          <p className="reference-list__note">{item.note}</p>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 export default function Page() {
   return (
     <main className="report-page">
-      <article className="report-shell">
-        <header className="hero">
-          <div className="hero__copy">
-            <p className="hero__eyebrow">TurboQuant Research Report</p>
-            <h1 className="hero__title">{reportData.title}</h1>
-            <p className="hero__subtitle">{reportData.subtitle}</p>
-            <p className="hero__intro">{reportData.intro}</p>
-            <div className="hero__callout">{reportData.heroTakeaway}</div>
-          </div>
-          <dl className="hero__stats">
-            {reportData.heroStats.map((item) => (
-              <HeroStat
-                key={item.label}
-                label={item.label}
-                value={item.value}
-                note={item.note}
-              />
+      <article className="report-article">
+        <header className="report-masthead">
+          <p className="report-masthead__eyebrow">Long-form Research Report</p>
+          <h1 className="report-masthead__title">{reportData.title}</h1>
+          <p className="report-masthead__subtitle">{reportData.subtitle}</p>
+          <p className="report-masthead__note">{reportData.heroNote}</p>
+          <dl className="report-stats">
+            {reportData.stats.map((stat) => (
+              <StatItem key={stat.label} {...stat} />
             ))}
           </dl>
         </header>
 
-        <section className="report-section" aria-labelledby="overview-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">맥락</p>
-            <h2 id="overview-title" className="section-heading__title">
-              먼저 잡아야 할 큰 그림
-            </h2>
-          </div>
-          <div className="overview-grid">
-            {reportData.overviewCards.map((card) => (
-              <article key={card.title} className="overview-card">
-                <h3 className="overview-card__title">{card.title}</h3>
-                <p className="overview-card__body">{card.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="report-section" aria-labelledby="timeline-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">연표</p>
-            <h2 id="timeline-title" className="section-heading__title">
-              기술이 이어진 순서
-            </h2>
-          </div>
-          <ol className="timeline">
-            {reportData.timeline.map((item) => (
-              <li key={`${item.date}-${item.title}`} className="timeline__item">
-                <p className="timeline__date">{item.date}</p>
-                <h3 className="timeline__title">{item.title}</h3>
-                <p className="timeline__note">{item.note}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="report-section" aria-labelledby="comparison-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">비교</p>
-            <h2 id="comparison-title" className="section-heading__title">
-              세 기법을 같은 기준으로 보면
-            </h2>
-          </div>
-          <div className="table-wrap">
-            <table className="comparison-table">
-              <caption className="sr-only">
-                QJL, PolarQuant, TurboQuant 비교표
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">방법</th>
-                  <th scope="col">직접 겨냥한 대상</th>
-                  <th scope="col">핵심 아이디어</th>
-                  <th scope="col">강점</th>
-                  <th scope="col">주의점</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.comparison.map((row) => (
-                  <tr key={row.method}>
-                    <td>{row.method}</td>
-                    <td>{row.focus}</td>
-                    <td>{row.idea}</td>
-                    <td>{row.strength}</td>
-                    <td>{row.caution}</td>
-                  </tr>
+        <div className="report-layout">
+          <aside className="report-sidebar">
+            <nav className="report-toc" aria-labelledby="toc-title">
+              <p id="toc-title" className="report-toc__title">
+                목차
+              </p>
+              <ol className="report-toc__list">
+                {reportData.sections.map((section) => (
+                  <li key={section.id} className="report-toc__item">
+                    <a href={`#${section.id}`} className="report-toc__link">
+                      {section.kicker} {section.title}
+                    </a>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          <ul className="source-chip-list">
-            {reportData.comparison.map((row) => (
-              <li key={`${row.method}-source`} className="source-chip">
-                <strong>{row.method}</strong> {row.source}
-              </li>
-            ))}
-          </ul>
-        </section>
+              </ol>
+            </nav>
 
-        <section className="report-section" aria-labelledby="sections-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">핵심 설명</p>
-            <h2 id="sections-title" className="section-heading__title">
-              논문별 원리와 해석
-            </h2>
-          </div>
-          <div className="section-grid">
+            <section className="sidebar-panel" aria-labelledby="basis-title">
+              <p id="basis-title" className="sidebar-panel__title">
+                작성 기준
+              </p>
+              <p className="sidebar-panel__body">{reportData.basis}</p>
+            </section>
+          </aside>
+
+          <div className="report-main">
+            <section className="report-intro" aria-labelledby="summary-title">
+              <div className="section-head">
+                <p className="section-head__eyebrow">먼저 읽기</p>
+                <h2 id="summary-title" className="section-head__title">
+                  이 보고서의 핵심 요약
+                </h2>
+              </div>
+              <div className="summary-grid">
+                {reportData.summaryPoints.map((point) => (
+                  <SummaryItem key={point.title} {...point} />
+                ))}
+              </div>
+            </section>
+
             {reportData.sections.map((section) => (
-              <SectionCard key={section.id} {...section} />
+              <SectionArticle key={section.id} {...section} />
             ))}
-          </div>
-        </section>
 
-        <section className="report-section" aria-labelledby="metrics-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">핵심 수치</p>
-            <h2 id="metrics-title" className="section-heading__title">
-              숫자로 보면 더 분명한 포인트
-            </h2>
-          </div>
-          <div className="metric-grid">
-            {reportData.metrics.map((metric) => (
-              <article key={metric.label} className="metric-card">
-                <p className="metric-card__label">{metric.label}</p>
-                <h3 className="metric-card__value">{metric.value}</h3>
-                <p className="metric-card__description">{metric.description}</p>
-                <p className="metric-card__source">{metric.source}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="report-section" aria-labelledby="takeaways-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">요약</p>
-            <h2 id="takeaways-title" className="section-heading__title">
-              읽고 나서 남겨야 할 문장
-            </h2>
-          </div>
-          <ul className="takeaway-list">
-            {reportData.takeaways.map((item) => (
-              <li key={item} className="takeaway-list__item">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="report-section" aria-labelledby="caveats-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">주의점</p>
-            <h2 id="caveats-title" className="section-heading__title">
-              숫자를 읽을 때 조심해야 할 부분
-            </h2>
-          </div>
-          <div className="caveat-grid">
-            {reportData.caveats.map((item) => (
-              <article key={item.title} className="caveat-card">
-                <h3 className="caveat-card__title">{item.title}</h3>
-                <p className="caveat-card__detail">{item.detail}</p>
-                <p className="caveat-card__source">{item.source}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="report-section" aria-labelledby="references-title">
-          <div className="section-heading">
-            <p className="section-heading__eyebrow">원문</p>
-            <h2 id="references-title" className="section-heading__title">
-              참고자료와 발표 시점
-            </h2>
-          </div>
-          <ul className="reference-list">
-            {reportData.references.map((reference) => (
-              <li key={reference.url} className="reference-list__item">
-                <p className="reference-list__meta">
-                  {reference.kind === "paper" ? "Paper" : "Blog"} · {reference.date}
+            <section className="article-section" aria-labelledby="comparison-title">
+              <header className="article-section__header">
+                <p className="article-section__kicker">부록 A</p>
+                <div className="article-section__title-row">
+                  <h2 id="comparison-title" className="article-section__title">
+                    세 기술을 한눈에 비교하면
+                  </h2>
+                  <span className="article-section__lens">사실+해석</span>
+                </div>
+                <p className="article-section__summary">
+                  같은 비트 수를 단순 비교하기보다, 무엇을 저장하고 어떤 오버헤드를
+                  줄이며 제품에 어떤 영향을 주는지로 읽는 편이 더 정확하다.
                 </p>
-                <a
-                  className="reference-list__title"
-                  href={reference.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {reference.title}
-                </a>
-                <p className="reference-list__note">{reference.note}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
+              </header>
+              <ComparisonTable rows={reportData.comparison} />
+            </section>
+
+            <section className="article-section" aria-labelledby="metrics-title">
+              <header className="article-section__header">
+                <p className="article-section__kicker">부록 B</p>
+                <div className="article-section__title-row">
+                  <h2 id="metrics-title" className="article-section__title">
+                    보고서에서 꼭 기억할 숫자
+                  </h2>
+                  <span className="article-section__lens">사실 기반</span>
+                </div>
+                <p className="article-section__summary">
+                  아래 수치는 논문과 공식 블로그에서 직접 확인한 값 또는 그 요약이다.
+                </p>
+              </header>
+              <MetricList items={reportData.metrics} />
+            </section>
+
+            <section className="article-section" aria-labelledby="references-title">
+              <header className="article-section__header">
+                <p className="article-section__kicker">부록 C</p>
+                <div className="article-section__title-row">
+                  <h2 id="references-title" className="article-section__title">
+                    참고자료
+                  </h2>
+                  <span className="article-section__lens">사실 기반</span>
+                </div>
+                <p className="article-section__summary">
+                  보고서 작성에 직접 사용한 원문 목록이다.
+                </p>
+              </header>
+              <ReferenceList items={reportData.references} />
+            </section>
+          </div>
+        </div>
 
         <footer className="report-footer">
-          <p className="report-footer__date">
-            작성 기준일: {reportData.updatedAt}
-          </p>
-          <p className="report-footer__note">
-            본 페이지는 사용자 제공 PDF 3개와 2026년 3월 24일 Google Research
-            공식 블로그 글만을 근거로 구성했다.
-          </p>
+          <p className="report-footer__date">작성 기준일: {reportData.updatedAt}</p>
+          <p className="report-footer__note">{reportData.basis}</p>
         </footer>
       </article>
     </main>
