@@ -2,6 +2,9 @@
 
 Google Research의 `TurboQuant`, `QJL`, `PolarQuant` 관련 자료를 바탕으로 만든 한국어 단일 페이지 보고서입니다.
 
+- Repository: [https://github.com/zeztto/google-turboquant](https://github.com/zeztto/google-turboquant)
+- Live: [https://google-turboquant.vercel.app](https://google-turboquant.vercel.app)
+
 ## Sources
 
 - [TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate](https://arxiv.org/abs/2504.19874)
